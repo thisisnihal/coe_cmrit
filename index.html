@@ -272,11 +272,42 @@
             overflow-y: scroll;
             font-size: 18px;
         }
+
         footer {
             display: flex;
             justify-content: center;
             align-items: center;
             margin-top: 10px;
+        }
+
+        #widget {
+            align-self: end;
+            justify-items: end;
+        }
+
+        #addToHomeBanner {
+            display: none;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background-color: #3498db;
+            color: #363636;
+            padding: 15px;
+            text-align: center;
+            z-index: 1000;
+            font-size: 18px;
+        }
+
+        #addToHomeBanner button {
+            background-color: #c7c7c7;
+            color: #000;
+            border: none;
+            border-radius: 5px;
+            padding: 8px 12px;
+            margin-left: 10px;
+            cursor: pointer;
+            font-weight: bold;
         }
     </style>
 </head>
@@ -322,6 +353,7 @@
         </footer>
     </div>
 
+
     <!-- Modal for mobile -->
     <div class="modal" id="event-modal">
         <div class="modal-content">
@@ -333,14 +365,17 @@
     </div>
 
     <div id="info-modal">
-       <p>The developer didn't trouble himself double-check the parsed pdf data from gpt, so if you show up to college and realize today was holiday... that's a surprise for you!.
-        <br> <br>
-        This webpage is provided "as is" without any warranties, guarantees, or representations of accuracy or completeness. The developer assumes no responsibility or liability for any errors, omissions, or outcomes resulting from the use of this data.
-        <br> <br>
-        Still, if you find any mistakes, feel free to make a pull request.
-        <br> <br>
-        [X]
-    </p>
+        <p>The developer didn't trouble himself double-check the parsed pdf data from gpt, so if you show up to college
+            and realize today was holiday... that's a surprise for you!.
+            <br> <br>
+            This webpage is provided "as is" without any warranties, guarantees, or representations of accuracy or
+            completeness. The developer assumes no responsibility or liability for any errors, omissions, or outcomes
+            resulting from the use of this data.
+            <br> <br>
+            Still, if you find any mistakes, feel free to make a pull request.
+            <br> <br>
+            [X]
+        </p>
     </div>
 
 
@@ -763,17 +798,40 @@
                     document.getElementById('event-modal').style.display = 'none';
                 }
             });
-            document.getElementById('info-btn').addEventListener('click', (e) =>{
-                document.getElementById('info-modal').style.display= 'flex';
+            document.getElementById('info-btn').addEventListener('click', (e) => {
+                document.getElementById('info-modal').style.display = 'flex';
             })
 
-            document.getElementById('info-modal').addEventListener('click', (e) =>{
-                document.getElementById('info-modal').style.display= 'none';
+            document.getElementById('info-modal').addEventListener('click', (e) => {
+                document.getElementById('info-modal').style.display = 'none';
             })
         }
+
+        function isMobile() {
+            return /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+        }
+        function dismissBanner() {
+            localStorage.setItem('addToHomeDismissed', 'true');
+            document.getElementById('addToHomeBanner').style.display = 'none';
+        }
+
+        window.addEventListener('load', () => {
+            if (isMobile() && !localStorage.getItem('addToHomeDismissed')) {
+                setTimeout(() => {
+                    document.getElementById('addToHomeBanner').style.display = 'block';
+                }, 2000);
+            }
+        });
 
         document.addEventListener('DOMContentLoaded', initCalendar);
     </script>
 </body>
+
+<div id="addToHomeBanner">
+     <p>You can 
+     <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24"><path d="M0 0h24v24H0V0z" fill="none"/><path d="M18 1.01L8 1c-1.1 0-2 .9-2 2v3h2V5h10v14H8v-1H6v3c0 1.1.9 2 2 2h10c1.1 0 2-.9 2-2V3c0-1.1-.9-1.99-2-1.99zM10 15h2V8H5v2h3.59L3 15.59 4.41 17 10 11.41V15z"/></svg>
+     Add to Home Screen </p>
+    <button onclick="dismissBanner()">X</button>
+</div>
 
 </html>
