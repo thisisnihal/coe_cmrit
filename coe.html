@@ -1,0 +1,779 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CMRIT Academic Calendar 2024-25</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --holiday-color: #f39c12;
+            --event-color: #e74c3c;
+            --light-gray: #ecf0f1;
+            --dark-gray: #7f8c8d;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+            padding: 10px;
+        }
+
+        .container {
+            max-width: 100%;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        h1 {
+            color: var(--primary-color);
+            margin-bottom: 5px;
+            font-size: 1.5rem;
+        }
+
+        .subtitle {
+            color: var(--dark-gray);
+            font-weight: normal;
+            font-size: 0.9rem;
+        }
+
+        .calendar-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .month-selector {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .month-year {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        .nav-button {
+            background: var(--secondary-color);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 6px 12px;
+            cursor: pointer;
+            transition: background 0.3s;
+            font-size: 0.9rem;
+        }
+
+        .nav-button:hover {
+            background: #2980b9;
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 5px;
+            margin-bottom: 20px;
+        }
+
+        .day-header {
+            text-align: center;
+            font-weight: bold;
+            padding: 8px 5px;
+            background: var(--primary-color);
+            color: white;
+            border-radius: 4px;
+            font-size: 0.8rem;
+        }
+
+        .calendar-day {
+            background: white;
+            border-radius: 4px;
+            padding: 8px 5px;
+            min-height: 50px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            position: relative;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .calendar-day:hover {
+            transform: scale(1.03);
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15);
+        }
+
+        .day-number {
+            font-weight: bold;
+            margin-bottom: 2px;
+            font-size: 0.9rem;
+            text-align: center;
+        }
+
+        .holiday {
+            background-color: rgba(243, 156, 18, 0.2);
+            border-left: 3px solid var(--holiday-color);
+        }
+
+        .holiday .day-number::after {
+            content: "";
+            font-weight: normal;
+            font-size: 0.7em;
+            color: var(--holiday-color);
+        }
+
+        .has-events::after {
+            content: "•";
+            position: absolute;
+            top: 2px;
+            right: 4px;
+            color: var(--event-color);
+            font-size: 1.2rem;
+        }
+
+        .event-details {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+            margin-top: 15px;
+            display: none;
+        }
+
+        .event-details h3 {
+            color: var(--primary-color);
+            margin-bottom: 8px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #eee;
+            font-size: 1.1rem;
+        }
+
+        .event-date {
+            color: var(--dark-gray);
+            font-size: 0.8rem;
+            margin-bottom: 10px;
+        }
+
+        .event-description {
+            line-height: 1.6;
+            font-size: 0.9rem;
+        }
+
+        .empty-day {
+            background: var(--light-gray);
+            opacity: 0.6;
+        }
+
+        .legend {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+            font-size: 0.8rem;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .legend-color {
+            width: 12px;
+            height: 12px;
+            border-radius: 2px;
+        }
+
+        .holiday-legend {
+            background-color: rgba(243, 156, 18, 0.2);
+            border-left: 3px solid var(--holiday-color);
+        }
+
+        .event-legend {
+            background-color: var(--light-gray);
+        }
+
+        .current-date-item {
+            border: 1px solid black;
+        }
+
+        /* mobile */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 100;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 400px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .close-modal {
+            float: right;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        @media (min-width: 768px) {
+            .modal {
+                display: none !important;
+            }
+
+            .event-details {
+                display: block !important;
+            }
+        }
+
+        #info-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(2, 2, 2, 0.952);
+            z-index: 100;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-weight: 500;
+            padding: 1rem;
+            overflow-y: scroll;
+            font-size: 18px;
+        }
+        footer {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1>CMR Institute of Technology</h1>
+            <p class="subtitle">Calendar of Events - Even Semester, 2024-2025</p>
+        </header>
+
+        <div class="legend">
+            <div class="legend-item">
+                <div class="legend-color holiday-legend"></div>
+                <span>Holiday</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color event-legend"></div>
+                <span>Has Events</span>
+            </div>
+        </div>
+
+        <div class="calendar-nav">
+            <button id="prev-month" class="nav-button">Previous</button>
+            <div class="month-selector">
+                <h2 id="current-month" class="month-year">February 2025</h2>
+            </div>
+            <button id="next-month" class="nav-button">Next</button>
+        </div>
+
+        <div class="calendar-grid" id="calendar">
+            <!-- Calendar days -->
+        </div>
+
+        <div class="event-details" id="event-details">
+            <h3 id="event-title">Select a date to view events</h3>
+            <div class="event-date" id="event-date"></div>
+            <div class="event-description" id="event-description"></div>
+        </div>
+
+        <footer>
+            <button style="border: none; color: purple; font-weight: 600; font-size: 10px;" id="info-btn">ℹ️</button>
+        </footer>
+    </div>
+
+    <!-- Modal for mobile -->
+    <div class="modal" id="event-modal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <h3 id="modal-event-title"></h3>
+            <div class="event-date" id="modal-event-date"></div>
+            <div class="event-description" id="modal-event-description"></div>
+        </div>
+    </div>
+
+    <div id="info-modal">
+       <p>The developer didn't trouble himself double-check the parsed pdf data from gpt, so if you show up to college and realize today was holiday... that's a surprise for you!.
+        <br> <br>
+        This webpage is provided "as is" without any warranties, guarantees, or representations of accuracy or completeness. The developer assumes no responsibility or liability for any errors, omissions, or outcomes resulting from the use of this data.
+        <br> <br>
+        Still, if you find any mistakes, feel free to make a pull request.
+        <br> <br>
+        [X]
+    </p>
+    </div>
+
+
+
+    <script>
+        // Calendar data extracted from the PDF
+        const calendarData = {
+            "February 2025": {
+                "01": { holiday: true, events: ["HOLIDAY", "Design, Build, Innovate: Robotics & IoT Prototyping for Smart Solutions – A Hands-on Program for School Students- I&E MCA"] },
+                "02": { holiday: true, events: ["HOLIDAY"] },
+                "03": { events: ["First Faculty and Mentoring Feedback – MBA -III Sem."] },
+                "04": { events: ["IAT-1 (MBA-I Sem.)"] },
+                "05": { events: ["IAT-1 (MBA, MCA-I Sem.)"] },
+                "06": { events: ["Last Working Day: BE. I Sem.", "IAT-1 (MBA, MCA-I Sem.)"] },
+                "07": { events: ["IAT-1 (MBA, MCA-I Sem.)"] },
+                "08": { events: ["IAT-1 (MBA, MCA-I Sem.)"] },
+                "09": { holiday: true, events: ["HOLIDAY"] },
+                "10": { events: ["Commencement of BE-IV, VI Sem. (2024-25)"] },
+                "11": { events: ["Workshop on 'Design Patent drafting' -Maths Dept."] },
+                "12": { events: ["Patent Drafting workshop to MBA 3rd Semester students (12.02.2025 to 14.02.2025)- I&E MBA", "Innovation Activity - Prototype Building -A Hands-on Program for School Students(12.02.2025 to 14.02.2025)- I&E MCA", "Brand Wars- Marketing Club MBA"] },
+                "13": { events: [] },
+                "14": { events: ["Expert Talk on 'The Future of Jobs is AI-Powered'-CoE-BA"] },
+                "15": { holiday: true, events: ["HOLIDAY"] },
+                "16": { holiday: true, events: ["HOLIDAY"] },
+                "17": { events: ["Commencement of BE-VIII Sem. (2024-25)"] },
+                "18": { events: ["Workshop on Effective Sales and Marketing Strategies for Entrepreneurs /Startups'- I&E – ISE", "Work Place Challenges- HR Club MBA Dept."] },
+                "19": { events: [] },
+                "20": { events: ["How to prepare business canvas Model- I&E ECE Dept.", "Cultural Fusion- EBSB Club", "Workshop on 'Building a foundation in Legal ethical and strategic steps for startups' -by Rama Krishna J, Prope Bengaluru-AIML-IIC7.0"] },
+                "21": { events: [] },
+                "22": { holiday: true, events: ["HOLIDAY- Maha Shivaratri"] },
+                "23": { holiday: true, events: ["HOLIDAY"] },
+                "24": { events: ["Shark Tank: Useless Startups Edition-IEEE CMRiT SB", "Field/Exposure Visit to Pre-incubation units such as AICTE Idea Lab, Fab lab, Makers Space, Design Centres, City MSME clusters, workshops - I&E ECE", "One Nation - One Celebration -CSE", "Webinar on 'Challenges and Benefits of using AI in Business: a Research Agenda'-CoE-BA", "Mandala magic: Stress - relief through art- Well Being Club & Women cell"] },
+                "25": { events: ["Expert talk on 'Overview of Residential Gateway'-ECE Dept.", "Design Thinking Workshop to MBA-I Sem. - I&E MBA"] },
+                "26": { events: ["'Celebration of Science and Innovation'-The National Science Day Competition- AIML-IIC7.0"] },
+                "27": { events: [] },
+                "28": { events: [] }
+            },
+            "March 2025": {
+                "01": { holiday: true, events: ["HOLIDAY"] },
+                "02": { holiday: true, events: ["HOLIDAY"] },
+                "03": { events: ["IAT-I (MBA-III Sem.)", "STTP on 'Characterization techniques and data analysis of functional materials' (03.03.2025 to 07.03.2025)-CoE-MS", "STTP on 'Explainable AI and Generative AI for Engineers, concepts,tools and Applications' (03.03.2025 to 13.03.2025)-CoE-XAI", "STTP on 'Smart Image and Video Analytics for real-world applications' (03.03.2025 to 13.03.2025)-CoE-IVA"] },
+                "04": { events: ["IAT-I (MBA-III Sem.)"] },
+                "05": { events: ["IAT-I (MBA-III Sem.)", "LTTP on 'Edge Computing Paradigm- The Next Evolution of Cloud' (05.03.25 to14.03.25)-DRC CSE Dept.", "Workshop on 'Research Proposal Writing and AI in Scientific Writing'-RC Cell", "TechQuest-IEEE CMRIT SB", "Engineering Optimization Hackathon: Designing Cost-Efficient Solutions'-Science Club, Math Dept.", "Code Sprint Event-CoE-AD", "Product and Brand Management Case Studies- Marketing Club MBA Dept.", "Expert Talk on 'AI and Cyber Security'-CoE-MIBD", "Expert Talk on '6th generation Automation and Robotics'- CoE-Makerspace", "Expert Talk on 'Evolution of Embedded Systems and Bridging the Enterprise-Research Gap'- CoE-ES", "Evolution and latest technology trends in AI enabled Drones- CoE -Drones and Robotics"] },
+                "06": { events: ["IAT-I (MBA-III Sem.)", "Creative Minds: Pitch paradox- IEEE CMRIT SB.", "Expert Talk on GenAI by Arpit Yadav, CCE, Bir'-CSE Dept."] },
+                "07": { events: ["IAT-I (MBA-III Sem.)", "Guest Lecture on 'Soft Kill Strategies in Drone warfare'-ECE Dept."] },
+                "08": { events: ["IAT-I (MBA-III Sem.)", "Workshop on 'Design thinking and Creative Problem solving to the process of generating new ideas and solutions'- IIC-AIML7.0"] },
+                "09": { holiday: true, events: ["HOLIDAY"] },
+                "10": { events: ["IAT-2 (MCA-III Sem.)", "Workshop on 'Mastering LaTeX for Research and Innovation: Hands-on Training for Aspiring Entrepreneurs and Researchers' (10.03.2025 to 14.03.2025)-Maths Dept.", "Workshop on 'SQL'(10.03.2025 to 14.03.2025)- CoE-BA", "STTP on 'Data Science and Analytics: A Hands-on Approach'(10.03.2025 to 14.03.2025)- CoE-MIBD", "Silver Jubilee Hackathon (10.03.2025 & 11.03.2025)-AIDS & ISE Dept."] },
+                "11": { events: ["IAT-2 (MCA-III Sem.)", "Workshop on 'Prototype/Process Design and Development' (11.03.2025 to 12.03.2025)- I&E ECE", "Second Faculty and Mentoring Feedback – MBA, MCA –I Sem."] },
+                "12": { events: ["Women's Day– Women cell & Well Being Club", "IAT-2 (MCA-III Sem.)", "Mini Project Exhibition I Sem – MCA Dept.", "Precision in Engineering: The Role of Error Analysis in Real-World Applications'- Science Club, Math", "Tech Sparks: Mini Project Exhibition '- DRC, I&E MCA Dept.", "Crisis Management- Finance club MBA Dept.", "Guest Lecture on 'Costing Methods by J Mohan, Aronlabz Tech/Bengaluru'- MBA Dept.", "Expert talk on 'Women Entrepreneurs'-EDC Cell", "Latest in Robots and Drones- CoE Drones and Robotics", "Science Club Activity-Quiz Competition-Physics Dept.", "Code Clash' – Competitive coding challenge.- I&E CSE Dept.", "Digital Detox session- Well Being Club & Women cell", "Grad connects: the ultimate workshop for abroad studies (12.03.2025 &13.03.2025)- EE&C Cell", "Workshop on Data Analysis using SPSS-MBA Dept.", "Startup training to MBA III sem. (12 & 13 March.) - I&E MBA"] },
+                "13": { events: ["IAT-2 (MCA-III Sem.)", "Brainstorm Bonanza-IEEE CMRIT SB", "From Syntax to Synthesis: The Journey of NLP to LLM' Poster presentation-CoE NLP", "Field Visit to Samrthanam Trust for problem identification- I&E ECE", "The Startup Spark: Ignite Your Journey'-Incubation Centre"] },
+                "14": { events: ["Pi Day-ISTE Maths Dept.", "Guest Lecture on 'Generative AI: Transforming Creativity and Innovation'-ECE Dept.", "First Faculty and Mentoring Feedback = BE –IV, VI Sem."] },
+                "15": { holiday: true, events: ["HOLIDAY"] },
+                "16": { holiday: true, events: ["HOLIDAY"] },
+                "17": { events: ["Commencement of BE-II Sem. (2024-25)", "STTP on 'Computation techniques of Calculus and linear Algebra with MATLAB and Python' (17- 22.03.2025)-CoE-MDS", "FDP on 'Structural Modelling Using AMOS'(17- 21.03.2025) -DRC-MBA"] },
+                "18": { events: ["IAT-2 (MBA, MCA-I Sem.)", "Second Faculty and Mentoring Feedback – MBA, MCA–III Sem."] },
+                "19": { events: ["IAT-2 (MBA, MCA-I Sem.)", "Talent Acquisitions - Role Plays Analytics perspective- HRA club MBA", "Talent Acquisitions - Role Plays Analytics perspective-HRA club MBA", "Session on 'How to plan for Start-up and legal & Ethical Steps'- AIML-IIC 7.0", "Listening Without Words: An empathy and Listening activity- Well Being Club & Women cell"] },
+                "20": { events: ["IAT-2 (MBA, MCA-I Sem.)", "Management Fest – 2025-MBA Dept.", "Training on 'Technical Document Writing '-DRC-CSE Dept.", "Pre-Placement Talk by Placed Students-ECE Dept.", "How to commercialize the product - I&E ECE Dept.", "Hands on Project Demo by Final Year AIML Students-CoE NLP"] },
+                "21": { events: ["IAT-2 (MBA, MCA-I Sem.)"] },
+                "22": { events: ["Ahimaya'25 (Ethnic Day)"] },
+                "23": { holiday: true, events: ["HOLIDAY"] },
+                "24": { events: ["IAT-2 (MBA-I Sem.)", "STTP on 'Decision Modelling using MS Excel'(24.03.2025 to 28.03.2025)- CoE-BA"] },
+                "25": { events: ["SAT TT MOCK Drive- MCA-III Sem.", "IAT-1 (BE-IV, VI Sem.)", "Expert Talk on 'Artificial Intelligence and Its Impact on Business'-CSE Dept.", "Mini Project Exhibition - I Sem (MBA)"] },
+                "26": { events: ["IAT-1 (BE-IV, VI Sem.)", "Tech: Code Warriors-IEEE CMRIT SB", "Expert Talk on 'Future Perspective of Super Capacitor'-CoE- MS", "Mutual Funds- Finance club MBA Dept.", "Mutual Funds- Finance club MBA Dept.", "Science Club Activity- Mars Mission- Physics Dept.", "Data-Driven Futures: How Alumni are Shaping the World of Analytics'- ECE ALUMNI"] },
+                "27": { events: ["IAT-1 (BE-IV, VI Sem.)", "CX Test (MBA, MCA-I Sem.)"] },
+                "28": { events: ["Last Working Day: MBA, MCA- I Sem. (2024-25).", "IAT-I (BE-IV, VI Sem.)", "Two Day workshop on Review of Literature - DRC MBA"] },
+                "29": { events: ["Marathon - Run for Lakes", "Virtual Cultural Exchange (sharing culture and tradition stories and facts)- EBSB Club", "Guest Lecture on 'Mechatronics & Role of Artificial Intelligence in Industry 4.0'. Mech Dept.", "Expert Talk on 'The Dynamical Systems Approach to Artificial Intelligence'.CoE-MDS"] },
+                "30": { holiday: true, events: ["HOLIDAY-Ligadi"] },
+                "31": { holiday: true, events: ["HOLIDAY-Ramzan"] }
+            },
+            "April 2025": {
+                "01": { events: ["Workshop on Research Methodology (01.04.2025&02.04.2025)-DRC-MBA"] },
+                "02": { events: ["Pre-training program for National Robotic League (02.04 & 03.04.2025)- COE-Makerspace", "Distracted Listener vs. Active Listener- Well Being Club & Women cell"] },
+                "03": { events: ["Express & Impress- IEEE CMRIT SB", "Logic Lockdown' – Logical and analytical problem-solving.-I&E CSE", "Startup training for ECE students -I&E ECE"] },
+                "04": { events: ["Cultura'25"] },
+                "05": { events: ["Cultura'25"] },
+                "06": { holiday: true, events: ["HOLIDAY"] },
+                "07": { events: ["IAT-2 (MBA-III Sem.)", "IAT-3 (MCA-III Sem.)", "Guest Lecture on 'Measurement by Vision'.Mech Dept."] },
+                "08": { events: ["IAT-2 (MBA-III Sem.)", "IAT-3 (MCA-III Sem.)"] },
+                "09": { events: ["IAT-2 (MBA-III Sem.)", "IAT-3 (MCA-III Sem.)", "Matrix Mastery: A Structural Load Analysis Quiz'. Science Club, Math", "Mad Ad- Marketing club MBA Dept.", "Workshop on Digital Marketing (09.04.2025 to 08.05.2025)-EDC Cell", "STTP on 'Natural Language Processing Applications and Prototypes using Python' (09.04.2025 to 23.04.2025)-CoE NLP"] },
+                "10": { holiday: true, events: ["HOLIDAY-Mahaveer Jayanti"] },
+                "11": { events: ["IAT-2 (MBA-III Sem.)", "IAT-3 (MCA-III Sem.)", "Transforming Communities: A Societal Project Exhibition'- DRC, I&E MCA Dept.", "National level Robotic League (11 &12.04.2025)- CoE-Makerspace"] },
+                "12": { events: ["IAT-2 (MBA-III Sem.)", "Industrial Visit to Visvesvaraya Industrial and Technological Museum- Chemistry Dept.", "Expert Talk on 'Responsible AI'. CoE-MIBD"] },
+                "13": { holiday: true, events: ["HOLIDAY"] },
+                "14": { holiday: true, events: ["HOLIDAY-Dr. B R Ambedkar Jayanthi"] },
+                "15": { events: ["STTP 'A.I enabled Drones and Robotics '(15.04.2025 to 19.04.2025)- CoE-Drones and Robotics"] },
+                "16": { events: ["CX Test (MBA, MCA-III Sem.)", "Guest lecture on 'Innovation and the rise of agentic AI'.Chemistry Dept.", "Think Outside the Box- IEEE SB", "Video Case Study-HR club - MBA", "Science Club Activity- Arduino Training-Physics Dept.", "Expert talk on 'Advanced materials for emerging photovoltaic technologies'- Physics Dept.", "Women's Safety by Police department- Well Being Club & Women cell", "Expert talk on 'The Role of Integrated Technologies in Shaping the Future of Automobiles'-CoE-ES", "Ideathon on 'Conscious Creations - Sustainable Innovations in Lifestyle: Food, Fashion and Festivals' (16.04.2025 & 17.04.2025)-Che. Dept."] },
+                "17": { events: ["Poster designing competition on 'Green Chemistry: Sustainable Solutions for a Better World'-Science Club, Chemistry Dept.", "Workshop on 'startup training'- I&E - ISE", "PrepSprint: IELTS & GRE mock experience- EE&C Cell"] },
+                "18": { holiday: true, events: ["HOLIDAY-Good Friday"] },
+                "19": { holiday: true, events: ["HOLIDAY"] },
+                "20": { holiday: true, events: ["HOLIDAY"] },
+                "21": { events: ["Last Working Day: MBA, MCA. III Sem.", "ISRO Industrial Visit to Investigate Novel Concepts-AIML Dept.", "Code Spark - Coding challenge on java- Protocol club MCA Dept."] },
+                "22": { events: ["Annual Inter Dept Sports IGNITE-25 (22.04.2025 to 25.04.2025)- Dept of Physical Edu& Sports."] },
+                "23": { events: ["First Faculty and Mentoring Feedback – BE –II Sem.", "Financial Markets- Finance club MBA", "Tech Chakravuyha- Idea competition (23-24.04.2025)-CoE-Makerspace.", "Expert Talk on 'Next Generation Materials'-Physics Dept.", "Career guidance- ECE ALUMNI"] },
+                "24": { events: ["Pre-Placement Talk by Placed Students-ECE Dept.", "Guest Lecture on 'Advancement in Electric Vehicle'-Mech Dept.", "Numerical Methods Hackathon: Solving Engineering Problems Efficiently'- Science Club, Math Dept."] },
+                "25": { events: ["Expert Talk on 'Edge AI and Real-Time Video Processing'-CoE- IVA", "Two days workshop on 'Workshop and hands-on Training on Advanced Analytical Techniques in Industrial Research'-Dept of Chemistry."] },
+                "26": { events: ["Aptitude Hackathon", "Industry Connect Summit 2025", "Techno Meet on Sustainability- CoE-MIBD and CoE-XAI", "Annual Sports Day", "Storytelling from paired states- EBSB Club", "Expert Talk on 'The Future of Work: Remote Work and Hybrid Models'-CSE Dept.", "Guest lecture on 'Scaling Innovation: Manufacturing Small-Diameter SWCNTs for Next-Generation Technologies'- Chemistry Dept."] },
+                "27": { holiday: true, events: ["HOLIDAY"] },
+                "28": { events: [] },
+                "29": { events: ["SAT TT"] },
+                "30": { holiday: true, events: ["HOLIDAY- Basava Jayanti/ Akshaya Tritiya"] }
+            },
+            "May 2025": {
+                "01": { holiday: true, events: ["HOLIDAY - May Day", "International Conference-ICECCC- 2025 (01.05.2025 & 02.05.2025) - IEEE CMRIT SB."] },
+                "02": { events: ["IAT-I (BE-II Sem.)"] },
+                "03": { holiday: true, events: ["HOLIDAY"] },
+                "04": { holiday: true, events: ["HOLIDAY"] },
+                "05": { events: ["Commencement of MBA, MCA- II Sem. (2024-25)", "IAT-I (BE-II Sem.)", "LTTP on'Nurturing Academic Leadership Program' (05.05.2025 to 09.05.2025)-MBA Dept."] },
+                "06": { events: ["IAT-I (BE-II Sem.)"] },
+                "07": { events: ["IAT-I (BE-II Sem.)", "Expert Talk on 'Creating AI based Applications using Flutter and Dart.'- CoE-AD", "Workshop on Business Model Canvas (BMC)- IICT.0 I&E MBA Dept."] },
+                "08": { events: ["Student seminar on 'Eco-Friendly Polymers: Crafting Biodegradable Plastics'-Science Club, Che. Dept.", "InnovateX project completion- IEEE CMRIT SB", "Display of projects implemented for Samarthanam trust at CMRIT- I&E ECE", "Training program on 'Product Design'-CoE-Additive Manufacturing", "Code Buzz-coding activity using Explainable AI-CoE-XAI", "Gradscope India: Navigating Higher Education in India and Beyond- EE&C Cell", "Debate Competition: 'Fourier vs. Wavelets: The Ultimate Debate in Signal Processing'-Science Club, Math"] },
+                "09": { events: [] },
+                "10": { events: ["MOCK Drive- BE-VI Sem.", "Expert Talk on 'Cyber Resilience: Building a Secure and Robust IT Infrastructure'-CSE Dept."] },
+                "11": { holiday: true, events: ["HOLIDAY"] },
+                "12": { events: [] },
+                "13": { events: ["Startup Conclave- Incubation Centre"] },
+                "14": { events: ["Mini Project Exhibition IV Sem – CSE, AIML/CSE-AIML and AI&DS/CSE-DS Dept.", "Mini Project/Major Project Phase-I Exhibition VI Sem. – ECE and ISE Dept.", "Product Management: 2nd Edition (14.05.2025 to 05.06.2025)-EDC Cell", "Science Club Activity - Hands on Activity with DS-Physics Dept."] },
+                "15": { events: ["Alumni talk on 'Future responsible consumption and production'-Physics Dept.", "Time Management : Sharing Best practices followed by students- Well Being Club & Women cell", "Last Working Day: BE-VIII Sem.", "Mini Project Exhibition IV Sem – ECE and ISE Dept.", "Mini Project/Major Project Phase-I Exhibition VI Sem. – CSE, AIML/CSE-AIML and AI&DS/ CSE- DS Dept.", "Second Faculty and Mentoring Feedback – BE –IV, VI Sem.", "National Level Social Hackathon (15.05.2025&16.05.2025)- EE&C Cell"] },
+                "16": { events: ["SAT TT", "International Conference on 'Business Analytics' (16.05.2025 & 17.05.2025)-MBA Dept."] },
+                "17": { holiday: true, events: ["HOLIDAY"] },
+                "18": { holiday: true, events: ["HOLIDAY"] },
+                "19": { events: [] },
+                "20": { events: ["Expert Talk on 'DevOps Security: Integrating Security into the True Development Cycle'-CSE Dept.", "Mini Project/Major Project Phase-I Exhibition- CSE, AIML/CSE-AIML, AI&DS/CSE-DS, ECE and ISE Dept", "Unplugged- IEEE CMRIT SB", "Expert Talk on 'Advancements in Real-Time Processing and Embedded System Design'-CoE- ES"] },
+                "21": { events: ["'Python for Engineers: Automating Math Computations'. Science Club, Math Dept.", "Expert Talk on 'Chemosensor for detection of warfare agents'-CoE- MS"] },
+                "22": { events: [] },
+                "23": { events: ["IAT-2 (BE-IV, VI Sem.)", "Expert Talk on 'Next Generation Materials'-Physics Dept."] },
+                "24": { events: ["IAT-2 (BE-IV, VI Sem.)", "Cultural photo/art contest- EBSB Club"] },
+                "25": { holiday: true, events: ["HOLIDAY"] },
+                "26": { events: ["Commencement of MBA, MCA-IV Sem.", "IAT-2 (BE-IV, VI Sem.)"] },
+                "27": { events: ["IAT-2 (BE-IV, VI Sem.)", "Expert Talk on 'Quantum Computing: Opportunities and Challenges'-CSE Dept."] },
+                "28": { events: ["CX Test (BE-IV, VI Sem.)", "Science Club Activity -Essay Competition-Physics Dept.", "Self-Defense Training- Well Being Club & Women cell", "Ideathon on 'GreenMind Challenge: Sustainable Innovations for Learning & Well-being' (28.05.2025 & 29.05.2025)-Chemistry Dept."] },
+                "29": { events: ["CX Test (BE-IV, VI Sem.)", "AI & Beyond- IEEE CMRIT SB"] },
+                "30": { events: [] },
+                "31": { events: ["Last Working Day: BE-IV, VI sem.", "Guest lecture on 'Advanced Cyber Threats & Ethical Hacking Techniques'-MCA Dept.", "Expert talk on 'Applications of Machine Learning (ML) and Mathematical Modeling (MM) in Healthcare with Special Focus on Cancer Prognosis'-CoE-MDS"] }
+            },
+            "June 2025": {
+                "01": { holiday: true, events: ["HOLIDAY"] },
+                "02": { events: [] },
+                "03": { events: [] },
+                "04": { events: ["Bug Battle - Debugging activity in python- Protocol club MCA Dept.", "Patent drafting workshop for II Sem MBA (4 & 5 Jun.)-I&E MBA Dept.", "Quiz competition on 'Chemistry in Action: Exploring Real-World Applications'-Science Club, Che. Dept."] },
+                "05": { events: ["Mini Project Exhibition -BE-II Sem."] },
+                "06": { events: ["Second Faculty and Mentoring Feedback – BE -II Sem."] },
+                "07": { holiday: true, events: ["HOLIDAY- Bakrid"] },
+                "08": { holiday: true, events: ["HOLIDAY"] },
+                "09": { events: [] },
+                "10": { events: [] },
+                "11": { events: ["Expert Talk on 'Green Chemistry & Sustainable Innovation: Driving the Future with Science & Entrepreneurship'- Chemistry Dept.", "FAP Ad - Marketing club MBA Dept.", "Guest Lecture on 'The Role of DevOps in Modern Software Development'-MCA Dept.", "Expert Talk on 'The Importance of Integrated Systems and Their Role in Electric Vehicle Design'-CoE-ES"] },
+                "12": { events: ["Mini Project Exhibition - II Sem (MCA)"] },
+                "13": { events: [] },
+                "14": { events: ["Grand Alumni Meet"] },
+                "15": { holiday: true, events: ["HOLIDAY"] },
+                "16": { events: ["First Faculty and Mentoring Feedback – MBA, MCA –II Sem."] },
+                "17": { events: ["IAT-2 (BE-II Sem.)"] },
+                "18": { events: ["IAT-2 (BE-II Sem.)", "Seminar on 'AI and the power of data'- Protocol club MCA Dept."] },
+                "19": { events: ["IAT-2 (BE-II Sem.)"] },
+                "20": { events: ["IAT-2 (BE-II Sem.)"] },
+                "21": { holiday: true, events: ["HOLIDAY"] },
+                "22": { holiday: true, events: ["HOLIDAY"] },
+                "23": { events: [] },
+                "24": { events: [] },
+                "25": { events: ["First Faculty and Mentoring Feedback – MBA, MCA –IV Sem."] },
+                "26": { events: ["CX Test (First Year- II Sem)", "Expert talk on 'Building Scalable Web Applications with Microservices'-MCA Dept."] },
+                "27": { events: [] },
+                "28": { events: ["Silver Jubilee Celebration", "Graduation Day", "Last Working Day: BE-II Sem."] },
+                "29": { holiday: true, events: ["HOLIDAY"] },
+                "30": { events: ["IAT-I (MBA, MCA -II Sem.)"] }
+            },
+            "July 2025": {
+                "01": { events: ["IAT-I (MBA, MCA -II Sem.)"] },
+                "02": { events: ["Customer Interaction 2.0 (02.07.2025 to 31.07.2025) - EDC Cell", "IAT-I (MBA, MCA -II Sem.)"] },
+                "03": { events: ["IAT-I (MBA, MCA -II Sem.)"] },
+                "04": { events: ["IAT-I (MBA-II Sem.)", "IAT-I (MCA-IV Sem.)"] },
+                "05": { holiday: true, events: ["HOLIDAY"] },
+                "06": { holiday: true, events: ["HOLIDAY- Moharam"] },
+                "07": { events: [] },
+                "08": { events: [] },
+                "09": { events: ["Talk to your techie – interaction about new technologies in the industry-"] },
+                "10": { events: [] },
+                "11": { events: [] },
+                "12": { holiday: true, events: ["HOLIDAY(Compensated 5 Apr.)"] },
+                "13": { holiday: true, events: ["HOLIDAY"] },
+                "14": { events: ["IAT-I (MBA-IV Sem.)"] },
+                "15": { events: ["IAT-I (MBA-IV Sem.)"] },
+                "16": { events: ["IAT-I (MBA-IV Sem.)", "Interview based event- HR club MBA", "Expert talk on 'AI-Based Test Automation: The Future of Software Testing'-MCA Dept.", "Expert Talk on 'Mastering Arduino and Sensors Through a Performance-Based Learning Approach'-CoE-ES"] },
+                "17": { events: ["IAT-I (MBA-IV Sem.)", "Session on 'Angel Investment/VC Funding Opportunity for Early-Stage Entrepreneurs'- I&E MCA"] },
+                "18": { events: ["IAT-I (MBA-IV Sem.)"] },
+                "19": { holiday: true, events: ["HOLIDAY"] },
+                "20": { holiday: true, events: ["HOLIDAY"] },
+                "21": { events: ["Second Faculty and Mentoring Feedback – MBA, MCA –II Sem."] },
+                "22": { events: ["Portfolio Management-Finance club MBA Dept.", "Expert Talk on 'Explainable AI With Knowledge Graphs and RAG'-CoE-XAI", "Beyond Bit Coin - Seminar on block chain- Protocol club MCA Dept."] },
+                "23": { events: [] },
+                "24": { events: ["Movie screening- EBSB Club"] },
+                "25": { events: [] },
+                "26": { events: ["Alumni Sports Meet", "Expert talk on 'Quantum Computing: What It Means for Software Developers'-MCA Dept.", "IAT-2 (MCA-IV Sem.)"] },
+                "27": { holiday: true, events: ["HOLIDAY"] },
+                "28": { events: [] },
+                "29": { events: [] },
+                "30": { events: [] },
+                "31": { events: [] }
+            },
+            "August 2025": {
+                "01": { events: [] },
+                "02": { holiday: true, events: ["HOLIDAY"] },
+                "03": { holiday: true, events: ["HOLIDAY"] },
+                "04": { events: ["IAT-2 (MBA, MCA -II Sem.)"] },
+                "05": { events: ["IAT-2 (MBA, MCA -II Sem.)"] },
+                "06": { events: ["IAT-2 (MBA, MCA -II Sem.)"] },
+                "07": { events: ["IAT-2 (MBA, MCA -II Sem.)"] },
+                "08": { events: ["IAT-2 (MBA -II Sem.)"] },
+                "09": { events: ["Expert talk on 'Explainable AI: Making AI Decisions Transparent'. MCA Dept."] },
+                "10": { holiday: true, events: ["HOLIDAY"] },
+                "11": { events: ["Second Faculty and Mentoring Feedback – MBA, MCA –IV Sem."] },
+                "12": { events: [] },
+                "13": { events: ["HR Whisle Blowing case Studies- HR club MBA Dept.", "Workshop on 'Development of web application'. Protocol club MCA Dept."] },
+                "14": { events: [] },
+                "15": { holiday: true, events: ["HOLIDAY- Independence Day", "Independence Day- Celebrating Aazadi Ka Amritkai- AlML- IIC7.0"] },
+                "16": { holiday: true, events: ["HOLIDAY"] },
+                "17": { holiday: true, events: ["HOLIDAY"] },
+                "18": { events: [] },
+                "19": { events: [] },
+                "20": { events: ["Expert Talk on 'The Importance of Embedded Systems in Advancing Artificial Intelligence'-CoE-ES"] },
+                "21": { events: ["Culture graffiti- EBSB Club", "Session on 'Lean Start-up & Minimum Viable Product/Business'- I&E - ISE"] },
+                "22": { events: ["Alumni Talk on 'Preparing for Careers in Business Analytics - Do's & Don'ts'-CoE-BA"] },
+                "23": { events: [] },
+                "24": { holiday: true, events: ["HOLIDAY"] },
+                "25": { events: ["IAT-2 (MBA-IV Sem.)"] },
+                "26": { events: ["IAT-2 (MBA-IV Sem.)"] },
+                "27": { holiday: true, events: ["HOLIDAY-Varasiddhi Vinayaka Chaturthi"] },
+                "28": { events: ["IAT-2 (MBA-IV Sem.)"] },
+                "29": { events: ["IAT-2 (MBA-IV Sem.)"] },
+                "30": { events: ["Chai times with Entrepreneurs - EDC Cell", "IAT-3 (MCA-IV Sem.)", "IAT-2 (MBA-IV Sem.)"] },
+                "31": { holiday: true, events: ["HOLIDAY"] }
+            },
+            "September 2025": {
+                "01": { events: [] },
+                "02": { events: [] },
+                "03": { events: [] },
+                "04": { events: [] },
+                "05": { holiday: true, events: ["HOLIDAY- Eid-Milad"] },
+                "06": { holiday: true, events: ["HOLIDAY"] },
+                "07": { holiday: true, events: ["HOLIDAY"] },
+                "08": { events: [] },
+                "09": { events: [] },
+                "10": { events: [] },
+                "11": { events: [] },
+                "12": { events: [] },
+                "13": { events: [] },
+                "14": { holiday: true, events: ["HOLIDAY"] },
+                "15": { events: [] },
+                "16": { events: [] },
+                "17": { events: ["Versatile Seller- Marketing club MBA Dept."] },
+                "18": { events: ["Mela: Pocket Entrepreneurial Ventures - EDC Cell"] },
+                "19": { events: [] },
+                "20": { holiday: true, events: ["HOLIDAY"] },
+                "21": { holiday: true, events: ["HOLIDAY-Mahalaya Amavasye"] },
+                "22": { events: [] },
+                "23": { events: [] },
+                "24": { events: ["Workshop on 'Fundamentals of Business Analytics'-CoE-BA", "Expert talk on 'Mechanical properties of stenose coronary arterial walls and its mathematics'-CoE-MDS"] },
+                "25": { events: ["Expert Talk on'Visual Detection of heavy metal Ions with a smartphone via a colorimetric paper based sensing device'- CoE-MS"] },
+                "26": { events: [] },
+                "27": { events: ["Storytelling from paired states- EBSB Club"] },
+                "28": { holiday: true, events: ["HOLIDAY"] },
+                "29": { events: [] },
+                "30": { events: [] }
+            }
+        };
+
+        const monthStartDays = {
+            "January 2025": 3, // 0 -> sun, 1 -> mon, ..., 6 -> sat
+            "February 2025": 6,
+            "March 2025": 6,
+            "April 2025": 2,
+            "May 2025": 4,
+            "June 2025": 0,
+            "July 2025": 2,
+            "August 2025": 5,
+            "September 2025": 1
+        };
+
+        const months = Object.keys(calendarData);
+
+        let currentMonthIndex = new Date().getMonth() - 1;
+        let todayMonth = new Date().getMonth() - 1;
+        let todayDate = new Date().getDate();
+
+        function initCalendar() {
+            updateCalendar();
+            setupEventListeners();
+        }
+
+        function updateCalendar() {
+            const currentMonth = months[currentMonthIndex];
+            document.getElementById('current-month').textContent = currentMonth;
+
+            const monthData = calendarData[currentMonth];
+
+            // clear the calendar
+            const calendarGrid = document.getElementById('calendar');
+            calendarGrid.innerHTML = '';
+
+            // Day headers
+            const daysOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+            daysOfWeek.forEach(day => {
+                const dayHeader = document.createElement('div');
+                dayHeader.className = 'day-header';
+                dayHeader.textContent = day;
+                calendarGrid.appendChild(dayHeader);
+            });
+
+            // starting day of the month;  0 -> sun, 1 -> mon, ..., 6 -> sat
+            const startDay = monthStartDays[currentMonth];
+
+            // Add empty cells for days before the first day of the month
+            for (let i = 0; i < startDay; i++) {
+                const emptyDay = document.createElement('div');
+                emptyDay.className = 'calendar-day empty-day';
+                calendarGrid.appendChild(emptyDay);
+            }
+
+            // Add days for the currentMonthIndex
+            for (let day = 1; day <= Object.keys(monthData).length; day++) {
+                const dayStr = day.toString();
+                const dayData = monthData[dayStr];
+                const dayElement = document.createElement('div');
+                dayElement.className = 'calendar-day';
+
+                if (dayData && dayData.holiday) {
+                    dayElement.classList.add('holiday');
+                }
+
+                if (dayData && dayData.events && dayData.events.length > 0) {
+                    dayElement.classList.add('has-events');
+                }
+
+                if (dayStr === String(todayDate) && todayMonth === currentMonthIndex) {
+                    dayElement.classList.add('current-date-item');
+                }
+
+                const dayNumber = document.createElement('div');
+                dayNumber.className = 'day-number';
+                dayNumber.textContent = day;
+                dayElement.appendChild(dayNumber);
+
+                dayElement.addEventListener('click', () => {
+                    showEventDetails(day, currentMonth, dayData);
+                });
+
+                calendarGrid.appendChild(dayElement);
+            }
+        }
+
+        // Show event details
+        function showEventDetails(day, month, dayData) {
+            const isMobile = window.innerWidth < 768;
+
+            if (isMobile) {
+                // Show modal for mobile
+                const modal = document.getElementById('event-modal');
+                const modalTitle = document.getElementById('modal-event-title');
+                const modalDate = document.getElementById('modal-event-date');
+                const modalDesc = document.getElementById('modal-event-description');
+
+                if (dayData && dayData.events && dayData.events.length > 0) {
+                    modalTitle.textContent = dayData.events[0];
+                    console.log('log = ', modalTitle.textContent)
+                    modalDate.textContent = `${month} ${day}`;
+                    modalDesc.innerHTML = dayData.events.map(event =>
+                        `<p>${event}</p>`
+                    ).join('');
+                } else {
+                    modalTitle.textContent = 'No Events';
+                    modalDate.textContent = `${month} ${day}`;
+                    modalDesc.textContent = 'There are no events scheduled for this date.';
+                }
+
+                modal.style.display = 'flex';
+            } else {
+                // panel for desktop
+                const eventDetails = document.getElementById('event-details');
+                const eventTitle = document.getElementById('event-title');
+                const eventDate = document.getElementById('event-date');
+                const eventDescription = document.getElementById('event-description');
+
+                if (dayData && dayData.events && dayData.events.length > 0) {
+                    eventTitle.textContent = dayData.events[0];
+                    eventDate.textContent = `${month} ${day}`;
+                    eventDescription.innerHTML = dayData.events.map(event =>
+                        `<p>${event}</p>`
+                    ).join('');
+                } else {
+                    eventTitle.textContent = 'No Events';
+                    eventDate.textContent = `${month} ${day}`;
+                    eventDescription.textContent = 'There are no events scheduled for this date.';
+                }
+            }
+        }
+
+        function setupEventListeners() {
+            document.getElementById('prev-month').addEventListener('click', () => {
+                if (currentMonthIndex > 0) {
+                    currentMonthIndex--;
+                    updateCalendar();
+                }
+            });
+
+            document.getElementById('next-month').addEventListener('click', () => {
+                if (currentMonthIndex < months.length - 1) {
+                    currentMonthIndex++;
+                    updateCalendar();
+                }
+            });
+
+            document.querySelector('.close-modal').addEventListener('click', () => {
+                document.getElementById('event-modal').style.display = 'none';
+            });
+
+            // close modal when clicking outside
+            document.getElementById('event-modal').addEventListener('click', (e) => {
+                if (e.target === document.getElementById('event-modal')) {
+                    document.getElementById('event-modal').style.display = 'none';
+                }
+            });
+            document.getElementById('info-btn').addEventListener('click', (e) =>{
+                document.getElementById('info-modal').style.display= 'flex';
+            })
+
+            document.getElementById('info-modal').addEventListener('click', (e) =>{
+                document.getElementById('info-modal').style.display= 'none';
+            })
+        }
+
+        document.addEventListener('DOMContentLoaded', initCalendar);
+    </script>
+</body>
+
+</html>
