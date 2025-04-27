@@ -678,8 +678,8 @@
         function updateCalendar() {
             const currentMonth = months[currentMonthIndex];
             document.getElementById('current-month').textContent = currentMonth;
-
             const monthData = calendarData[currentMonth];
+            console.log('current month =', currentMonth, monthData)
 
             // clear the calendar
             const calendarGrid = document.getElementById('calendar');
@@ -706,16 +706,15 @@
 
             // Add days for the currentMonthIndex
             for (let day = 1; day <= Object.keys(monthData).length; day++) {
-                const dayStr = day.toString();
+                const dayStr = day.toString().padStart(2, '0');
                 const dayData = monthData[dayStr];
+                console.log('day data =', day, dayData)
                 const dayElement = document.createElement('div');
                 dayElement.className = 'calendar-day';
 
                 if (dayData && dayData.holiday) {
                     dayElement.classList.add('holiday');
-                }
-
-                if (dayData && dayData.events && dayData.events.length > 0) {
+                } else if (dayData && dayData.events && dayData.events.length > 0) {
                     dayElement.classList.add('has-events');
                 }
 
